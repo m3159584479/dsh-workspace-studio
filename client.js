@@ -34,7 +34,7 @@ window.__ModuleLoader__.load({
     const PRESETS_KEY = 'dsh.plugin-studio.view-presets.v1';
     const REMOVED_KEY = 'dsh.plugin-studio.removed-workspaces.v1';
     const SNAPSHOT_KEY = 'dsh.plugin-studio.workspace-snapshot.v1';
-    const TOUR_KEY = 'dsh.plugin-studio.onboarding.v1';
+    const TOUR_KEY = 'dsh.plugin-studio.onboarding.v2';
 
     function readTourSeen() {
       try {

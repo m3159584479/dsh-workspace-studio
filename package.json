@@ -1,6 +1,6 @@
 {
   "name": "@315958/dsh-workspace-studio",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Nested workspaces with real folders, first-run onboarding, collapse/hide and focus modes, quick switching, saved view presets, a workspace health check, and conversational plugin repair for DeepSeek Harness.",
   "type": "module",
   "license": "MIT",
