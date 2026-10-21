@@ -406,6 +406,14 @@ window.__ModuleLoader__.load({
       hiddenParent: 'Parent',
       hideChildWorkspaces: 'Hide child workspaces',
       showChildWorkspaces: 'Show child workspaces',
+      manageChildWorkspaces: 'Show/hide child workspaces…',
+      childVisibilityTitle: 'Choose child workspaces to show',
+      childVisibilityHint: 'Checked workspaces stay visible; unchecked ones are hidden. Parent:',
+      childVisibilityShown: 'Visible',
+      childVisibilityHidden: 'Hidden',
+      childVisibilityApply: 'Apply',
+      childVisibilityCancel: 'Cancel',
+      childVisibilityEmpty: 'This workspace has no direct child workspaces.',
       newChildWorkspace: 'New sub-workspace',
       newChildTitle: 'New sub-workspace',
       newChildParent: 'Parent workspace',
@@ -465,6 +473,7 @@ window.__ModuleLoader__.load({
       tourStep2a: 'Existing folders are rejected; they are never adopted.',
       tourStep2b: 'A child workspace gets a separate Delete workspace folder action.',
       tourStep2c: 'That delete is permanent and only applies to sub-workspaces.',
+      tourStep2d: 'Show/hide child workspaces opens a checklist; choose which children stay visible.',
       tourInputTitle: 'Name the folder and create',
       tourInputBody: 'Type a folder name, then create. The new folder is registered as a child workspace immediately.',
       tourSettingsTitle: 'Open Settings',
@@ -579,6 +588,14 @@ window.__ModuleLoader__.load({
       hiddenParent: '父级',
       hideChildWorkspaces: '隐藏子工作区',
       showChildWorkspaces: '显示子工作区',
+      manageChildWorkspaces: '显示/隐藏子工作区…',
+      childVisibilityTitle: '选择要显示的子工作区',
+      childVisibilityHint: '勾选保持显示，取消勾选会隐藏。父级：',
+      childVisibilityShown: '显示中',
+      childVisibilityHidden: '已隐藏',
+      childVisibilityApply: '应用',
+      childVisibilityCancel: '取消',
+      childVisibilityEmpty: '这个工作区没有直接子工作区。',
       newChildWorkspace: '新建子工作区',
       newChildTitle: '新建子工作区',
       newChildParent: '父工作区',
@@ -638,6 +655,7 @@ window.__ModuleLoader__.load({
       tourStep2a: '已有文件夹会被拒绝，不会被自动接管。',
       tourStep2b: '子工作区的「...」菜单会有单独的「删除工作区文件夹」。',
       tourStep2c: '这个删除是永久的，而且只对子工作区开放。',
+      tourStep2d: '「显示/隐藏子工作区…」会打开勾选列表，只显示你选中的子级。',
       tourInputTitle: '输入文件夹名并创建',
       tourInputBody: '输入文件夹名后点创建。新文件夹会立刻注册成子工作区。',
       tourSettingsTitle: '打开设置',
@@ -867,6 +885,16 @@ window.__ModuleLoader__.load({
 .pst-childCheck input{margin:0;accent-color:var(--dsw-alias-brand-primary);flex:none}
 .pst-childError{margin:0;padding:8px 10px;border:.5px solid var(--dsw-alias-state-error-primary);border-radius:8px;color:var(--dsw-alias-state-error-primary);font-size:11px;line-height:17px;overflow-wrap:anywhere}
 .pst-childActions{display:flex;justify-content:flex-end;gap:8px;margin-top:2px}
+.pst-childPicker{width:min(540px,100%)}
+.pst-childVisibilityList{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow:auto;padding-right:2px}
+.pst-childVisibilityRow{display:flex;align-items:center;gap:10px;min-width:0;padding:9px 10px;border:.5px solid var(--dsw-alias-border-l1);border-radius:8px;background:var(--dsw-alias-bg-layer-1);cursor:pointer}
+.pst-childVisibilityRow:hover{background:var(--dsw-alias-bg-layer-2)}
+.pst-childVisibilityRow input{flex:none;width:14px;height:14px;margin:0;accent-color:var(--dsw-alias-brand-primary)}
+.pst-childVisibilityText{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.pst-childVisibilityName{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;line-height:18px;color:var(--dsw-alias-label-primary)}
+.pst-childVisibilityPath{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;line-height:15px;color:var(--dsw-alias-label-tertiary)}
+.pst-childVisibilityState{flex:none;padding:1px 6px;border-radius:4px;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-tertiary);font-size:10px;line-height:16px}
+.pst-childEmpty{padding:12px;border-radius:8px;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-tertiary);font-size:12px;line-height:18px}
 @media (max-width:640px){.pst-childLayer{padding:12px}}
 .pst-tab{display:flex;flex-direction:column;gap:16px;padding:2px 0 28px;color:var(--dsw-alias-label-primary)}
 .pst-tabHead{display:flex;flex-direction:column;gap:4px}
@@ -1285,6 +1313,54 @@ window.__ModuleLoader__.load({
           });
         };
 
+        let childVisibilityDialog = { open: false, parentTitle: '', items: [] };
+        const childVisibilityListeners = new Set();
+        const subscribeChildVisibility = (listener) => {
+          childVisibilityListeners.add(listener);
+          return () => {
+            childVisibilityListeners.delete(listener);
+          };
+        };
+        const getChildVisibilityDialog = () => childVisibilityDialog;
+        const setChildVisibilityDialog = (patch) => {
+          childVisibilityDialog = { ...childVisibilityDialog, ...patch };
+          for (const listener of Array.from(childVisibilityListeners)) {
+            try {
+              listener();
+            } catch (error) {
+              console.error('plugin-studio child visibility listener failed', error);
+            }
+          }
+        };
+        const useChildVisibilityDialog = () => {
+          const [value, setValue] = React.useState(getChildVisibilityDialog);
+          React.useEffect(() => {
+            setValue(getChildVisibilityDialog());
+            return subscribeChildVisibility(() => setValue(getChildVisibilityDialog()));
+          }, []);
+          return value;
+        };
+        const openChildVisibility = (parent, displayTitle, children) => {
+          const items = Array.isArray(children)
+            ? children.map((child) => ({
+              id: child.workspaceId,
+              title: child.title || child.path || child.workspaceId,
+              path: typeof child.path === 'string' ? child.path : '',
+              visible: !isHidden(`workspace:${child.workspaceId}`),
+            }))
+            : [];
+          setChildVisibilityDialog({
+            open: true,
+            parentTitle:
+              typeof displayTitle === 'string' && displayTitle !== ''
+                ? displayTitle
+                : parent !== null && parent !== undefined && typeof parent.title === 'string'
+                  ? parent.title
+                  : '',
+            items,
+          });
+        };
+
         const callPluginRoute = async (route, body) => {
           const response = await fetch(route, {
             method: 'POST',
@@ -1635,6 +1711,87 @@ window.__ModuleLoader__.load({
                   },
                   state.busy ? tr('opening') : tr('newChildCreate'),
                 ),
+              ),
+            ),
+          );
+        }
+
+        function ChildVisibilityDialog() {
+          const state = useChildVisibilityDialog();
+          if (!state.open) return null;
+
+          const close = () => setChildVisibilityDialog({ open: false });
+          const toggle = (id) => {
+            setChildVisibilityDialog({
+              items: state.items.map((item) =>
+                item.id === id ? { ...item, visible: !item.visible } : item),
+            });
+          };
+          const apply = () => {
+            for (const item of state.items) {
+              const key = `workspace:${item.id}`;
+              if (item.visible) forgetHidden(key);
+              else rememberHidden(key, item.title);
+            }
+            setChildVisibilityDialog({ open: false });
+            notifyStateChanged();
+          };
+
+          return h(
+            'div',
+            { className: 'pst-childLayer' },
+            h('div', {
+              className: 'pst-childBackdrop',
+              'aria-hidden': 'true',
+              onMouseDown: close,
+            }),
+            h(
+              'div',
+              {
+                className: 'pst-childModal pst-childPicker',
+                role: 'dialog',
+                'aria-modal': 'true',
+                'aria-labelledby': 'pst-child-visibility-title',
+                onKeyDown: (event) => {
+                  if (event.key !== 'Escape') return;
+                  event.preventDefault();
+                  close();
+                },
+              },
+              h('h3', { className: 'pst-childTitle', id: 'pst-child-visibility-title' }, tr('childVisibilityTitle')),
+              h('p', { className: 'pst-childHint' }, `${tr('childVisibilityHint')} ${state.parentTitle}`),
+              state.items.length === 0
+                ? h('div', { className: 'pst-childEmpty' }, tr('childVisibilityEmpty'))
+                : h(
+                  'div',
+                  { className: 'pst-childVisibilityList' },
+                  state.items.map((item) =>
+                    h(
+                      'label',
+                      { key: item.id, className: 'pst-childVisibilityRow' },
+                      h('input', {
+                        type: 'checkbox',
+                        checked: item.visible,
+                        onChange: () => toggle(item.id),
+                      }),
+                      h(
+                        'span',
+                        { className: 'pst-childVisibilityText' },
+                        h('span', { className: 'pst-childVisibilityName' }, item.title),
+                        item.path === '' ? null : h('span', { className: 'pst-childVisibilityPath' }, item.path),
+                      ),
+                      h(
+                        'span',
+                        { className: 'pst-childVisibilityState' },
+                        item.visible ? tr('childVisibilityShown') : tr('childVisibilityHidden'),
+                      ),
+                    )),
+                ),
+              h(
+                'div',
+                { className: 'pst-childActions' },
+                h('button', { type: 'button', className: 'pst-btn', onClick: close }, tr('childVisibilityCancel')),
+                h('button', { type: 'button', className: 'pst-btn pst-btnPrimary', onClick: apply }, tr('childVisibilityApply')),
               ),
             ),
           );
@@ -2328,8 +2485,6 @@ window.__ModuleLoader__.load({
             const workspace = runtime.workspaces.find((candidate) => candidate.workspaceId === workspaceId) || null;
             const parentOfTarget = workspace === null ? null : parentWorkspaceOf(workspace);
             const children = workspace === null ? [] : directChildrenOf(workspace);
-            const hiddenChildren = children.filter((child) => isHidden(`workspace:${child.workspaceId}`));
-            const showChildren = hiddenChildren.length > 0;
             const build = (marker, label, icon, handler, source) => {
               if (target.container.querySelector(`[${marker}]`) !== null) return;
               const template = source !== undefined && source !== null ? source : target.template;
@@ -2438,21 +2593,11 @@ window.__ModuleLoader__.load({
             }
             if (children.length > 0) {
               build(
-                'data-pst-toggle-children',
-                showChildren
-                  ? `${tr('showChildWorkspaces')} (${hiddenChildren.length})`
-                  : `${tr('hideChildWorkspaces')} (${children.length})`,
-                showChildren ? CHILD_SHOW_ICON : CHILD_HIDE_ICON,
+                'data-pst-manage-children',
+                tr('manageChildWorkspaces'),
+                CHILD_SHOW_ICON,
                 () => {
-                  if (showChildren) {
-                    for (const child of children) forgetHidden(`workspace:${child.workspaceId}`);
-                  } else {
-                    for (const child of children) {
-                      rememberHidden(`workspace:${child.workspaceId}`, child.title || child.workspaceId);
-                    }
-                  }
-                  applyHidden();
-                  renderBar();
+                  openChildVisibility(workspace, title, children);
                   closeMenu(row);
                 },
               );
@@ -3210,7 +3355,7 @@ window.__ModuleLoader__.load({
             {
               title: tr('tourStep2Title'),
               body: tr('tourStep2Body'),
-              items: [tr('tourStep2a'), tr('tourStep2b'), tr('tourStep2c')],
+              items: [tr('tourStep2a'), tr('tourStep2b'), tr('tourStep2c'), tr('tourStep2d')],
             },
             {
               title: tr('tourInputTitle'),
@@ -4190,6 +4335,17 @@ window.__ModuleLoader__.load({
               order: 42,
             },
             NewChildWorkspaceDialog,
+          ),
+        );
+
+        ctx.slots.inject('shell.overlay', () =>
+          ctx.slots.register(
+            {
+              name: 'shell.overlay',
+              id: 'plugin-studio.child-visibility-dialog',
+              order: 42.5,
+            },
+            ChildVisibilityDialog,
           ),
         );
 
