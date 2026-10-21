@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Plugin Studio",
+    "description": "Adds “New sub-workspace”, “Collapse/Hide workspace”, “Focus this workspace”, and “Delete workspace folder” to workspace menus, plus quick switch, saved view presets, and a workspace health check. Sub-workspaces are real folders registered as workspaces and shown in the built-in Workspace Tree view; deleting one removes the real folder after confirmation. Settings → Plugins includes a workspace manager and a Plugin chats tab."
+  }
+}

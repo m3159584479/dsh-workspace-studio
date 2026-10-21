@@ -1,0 +1,60 @@
+{
+  "name": "@315958/dsh-workspace-studio",
+  "version": "1.1.0",
+  "description": "Nested workspaces with real folders, collapse/hide and focus modes, quick switching, saved view presets, a workspace health check, and plugin repair chats for DeepSeek Harness.",
+  "type": "module",
+  "license": "MIT",
+  "author": "m3159584479",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/m3159584479/dsh-workspace-studio.git"
+  },
+  "homepage": "https://github.com/m3159584479/dsh-workspace-studio#readme",
+  "bugs": {
+    "url": "https://github.com/m3159584479/dsh-workspace-studio/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "workspace",
+    "workspace-tree",
+    "nested-workspaces"
+  ],
+  "engines": {
+    "dsh": ">=0.2.1-rc.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-sidebar",
+        "@deepseek-ai/dsh-client-ui-plugin-manager",
+        "@deepseek-ai/dsh-client-ui-workspace",
+        "@deepseek-ai/dsh-client-ui-session"
+      ]
+    }
+  }
+}

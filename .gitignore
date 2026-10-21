@@ -1,0 +1,17 @@
+node_modules/
+*.tgz
+PUBLISHING.zh.md
+
+# Local/editor files
+.DS_Store
+Thumbs.db
+*.log
+
+# Never commit credentials or environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
