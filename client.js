@@ -34,6 +34,23 @@ window.__ModuleLoader__.load({
     const PRESETS_KEY = 'dsh.plugin-studio.view-presets.v1';
     const REMOVED_KEY = 'dsh.plugin-studio.removed-workspaces.v1';
     const SNAPSHOT_KEY = 'dsh.plugin-studio.workspace-snapshot.v1';
+    const TOUR_KEY = 'dsh.plugin-studio.onboarding.v1';
+
+    function readTourSeen() {
+      try {
+        return window.localStorage.getItem(TOUR_KEY) === '1';
+      } catch (_) {
+        return false;
+      }
+    }
+
+    function writeTourSeen() {
+      try {
+        window.localStorage.setItem(TOUR_KEY, '1');
+      } catch (_) {
+        /* private mode: the tutorial may reappear next session */
+      }
+    }
 
     function notifyStateChanged() {
       try {
@@ -433,6 +450,31 @@ window.__ModuleLoader__.load({
       quickSwitchUntitled: 'Untitled session',
       quickSwitchKeys: '↑↓ navigate · Enter open · Esc close',
       quickSwitchWorkspace: 'Workspace',
+      tutorial: 'Tutorial',
+      tourKicker: 'Interactive guide',
+      tourTitle: 'Welcome to Workspace Studio',
+      tourStep1Title: 'Open the workspace menu',
+      tourStep1Body: 'Hover this workspace row and click the … button. New sub-workspace, collapse, focus, and hide live there.',
+      tourStep1a: 'Open the workspace “…” menu and choose New sub-workspace.',
+      tourStep1b: 'Enter a folder name; an existing folder is rejected.',
+      tourStep1c: 'Switch to View options → Group by → Workspace Tree to see the real hierarchy.',
+      tourStep2Title: 'Create a real sub-folder',
+      tourStep2Body: 'Click New sub-workspace. It creates a real folder and registers it as a child workspace.',
+      tourStep2a: 'Existing folders are rejected; they are never adopted.',
+      tourStep2b: 'A child workspace gets a separate Delete workspace folder action.',
+      tourStep2c: 'That delete is permanent and only applies to sub-workspaces.',
+      tourInputTitle: 'Name the folder and create',
+      tourInputBody: 'Type a folder name, then create. The new folder is registered as a child workspace immediately.',
+      tourStep3Title: 'Update plugins by conversation',
+      tourStep3Body: 'Open Settings → Plugins → Plugin chats, choose a non-official plugin or row, then click Chat.',
+      tourStep3a: 'The conversation carries the plugin identity, source, and your note.',
+      tourStep3b: 'An existing conversation is reused; Shift+click Chat starts a new one.',
+      tourStep3c: 'The conversation proposes and applies changes only through the normal Agent confirmation flow.',
+      tourBack: 'Back',
+      tourNext: 'Next',
+      tourStart: 'Done',
+      tourSkip: 'Skip tutorial',
+      tourClose: 'Close tutorial',
       quickSwitchSession: 'Session',
       healthTitle: 'Workspace health',
       healthIntro: 'Check registered paths, duplicate entries, empty workspaces, and overly deep nesting.',
@@ -569,6 +611,31 @@ window.__ModuleLoader__.load({
       quickSwitchUntitled: '未命名会话',
       quickSwitchKeys: '↑↓ 选择 · Enter 打开 · Esc 关闭',
       quickSwitchWorkspace: '工作区',
+      tutorial: '使用教程',
+      tourKicker: '互动引导',
+      tourTitle: '欢迎使用工作区工作室',
+      tourStep1Title: '先打开工作区菜单',
+      tourStep1Body: '把鼠标移到这个工作区行，点击右侧的 …。新建子工作区、折叠、专注和隐藏都在这里。',
+      tourStep1a: '打开工作区行的「…」菜单，选择「新建子工作区」。',
+      tourStep1b: '输入文件夹名；已有文件夹会被拒绝，不会被自动接管。',
+      tourStep1c: '在「视图选项 → 分组 → 按工作区树」中查看真实层级。',
+      tourStep2Title: '创建真实子文件夹',
+      tourStep2Body: '点击「新建子工作区」。它会创建一个真实文件夹，并注册成子工作区。',
+      tourStep2a: '已有文件夹会被拒绝，不会被自动接管。',
+      tourStep2b: '子工作区的「...」菜单会有单独的「删除工作区文件夹」。',
+      tourStep2c: '这个删除是永久的，而且只对子工作区开放。',
+      tourInputTitle: '输入文件夹名并创建',
+      tourInputBody: '输入文件夹名后点创建。新文件夹会立刻注册成子工作区。',
+      tourStep3Title: '用对话更新插件',
+      tourStep3Body: '打开 Settings → Plugins → 插件对话，选择非官方插件或某一行，然后点「对话」。',
+      tourStep3a: '会话会带上插件身份、来源和你的调整说明。',
+      tourStep3b: '已有对话会复用；Shift+点击「对话」新建一条。',
+      tourStep3c: '改动仍通过正常的 Agent 确认流程执行，不会绕过确认。',
+      tourBack: '上一步',
+      tourNext: '下一步',
+      tourStart: '完成',
+      tourSkip: '跳过教程',
+      tourClose: '关闭教程',
       quickSwitchSession: '会话',
       healthTitle: '工作区健康',
       healthIntro: '检查注册路径、重复条目、空工作区和过深嵌套。',
@@ -688,6 +755,49 @@ window.__ModuleLoader__.load({
 .pst-switcherMeta{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--dsw-alias-label-tertiary);font-size:11px;line-height:16px}
 .pst-switcherEmpty{padding:18px 10px;color:var(--dsw-alias-label-secondary);font-size:12px;text-align:center}
 .pst-switcherFoot{padding:7px 14px;border-top:.5px solid var(--dsw-alias-border-l1);color:var(--dsw-alias-label-tertiary);font-size:11px;line-height:16px}
+.pst-tourLayer{position:fixed;inset:0;z-index:96;display:flex;align-items:center;justify-content:center;padding:20px;pointer-events:none}
+.pst-tourBackdrop{position:absolute;inset:0;background:var(--dsw-alias-bg-base);opacity:.62;pointer-events:auto}
+.pst-tourCard{position:relative;pointer-events:auto;box-sizing:border-box;display:flex;flex-direction:column;gap:11px;width:min(560px,100%);max-height:calc(100vh - 40px);overflow:auto;padding:20px 22px 18px;border:.5px solid var(--dsw-alias-border-l2);border-radius:14px;background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);box-shadow:0 22px 70px rgba(0,0,0,.4)}
+.pst-tourTop{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pst-tourTopRight{display:flex;align-items:center;gap:8px}
+.pst-tourKicker{color:var(--dsw-alias-brand-primary);font-size:11px;line-height:16px;font-weight:600;letter-spacing:.04em}
+.pst-tourCount{color:var(--dsw-alias-label-tertiary);font-size:11px;line-height:16px}
+.pst-tourClose{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--dsw-alias-label-tertiary);font:inherit;font-size:18px;line-height:1;cursor:pointer}
+.pst-tourClose:hover{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
+.pst-tourClose:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:1px}
+.pst-tourArt{display:flex;align-items:center;justify-content:center;height:104px;border:.5px solid var(--dsw-alias-border-l1);border-radius:10px;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-brand-primary);flex:none}
+.pst-tourArt svg{width:64px;height:64px}
+.pst-tourTitle{margin:2px 0 0;font-size:18px;line-height:26px;font-weight:600}
+.pst-tourBody{margin:0;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:19px}
+.pst-tourList{margin:0;padding-left:18px;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:19px;display:flex;flex-direction:column;gap:4px}
+.pst-tourFoot{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:4px;padding-top:12px;border-top:.5px solid var(--dsw-alias-border-l1)}
+.pst-tourSkip{padding:0;border:0;background:none;color:var(--dsw-alias-label-tertiary);font:inherit;font-size:11px;line-height:17px;cursor:pointer}
+.pst-tourSkip:hover{color:var(--dsw-alias-label-primary);text-decoration:underline}
+.pst-tourDots{display:flex;align-items:center;gap:5px}
+.pst-tourDot{width:5px;height:5px;border-radius:50%;background:var(--dsw-alias-border-l2)}
+.pst-tourDotActive{width:16px;border-radius:3px;background:var(--dsw-alias-brand-primary)}
+.pst-tourActions{display:flex;align-items:center;gap:7px}
+.pst-coachLayer{position:fixed;inset:0;z-index:97;pointer-events:none}
+.pst-coachSpot{position:fixed;z-index:97;box-sizing:border-box;border:1.5px solid var(--dsw-alias-brand-primary);border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,.56);pointer-events:none;transition:left .16s ease,top .16s ease,width .16s ease,height .16s ease}
+.pst-coachTip{position:fixed;z-index:98;box-sizing:border-box;display:flex;flex-direction:column;gap:8px;pointer-events:auto;padding:14px 16px 12px;border:.5px solid var(--dsw-alias-border-l2);border-radius:10px;background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);box-shadow:0 16px 46px rgba(0,0,0,.42)}
+.pst-coachTipCenter{position:fixed}
+.pst-coachTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pst-coachTopRight{display:flex;align-items:center;gap:7px}
+.pst-coachKicker{color:var(--dsw-alias-brand-primary);font-size:10px;line-height:15px;font-weight:600;letter-spacing:.04em}
+.pst-coachCount{color:var(--dsw-alias-label-tertiary);font-size:10px;line-height:15px}
+.pst-coachClose{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;padding:0;border:0;border-radius:5px;background:transparent;color:var(--dsw-alias-label-tertiary);font:inherit;font-size:17px;line-height:1;cursor:pointer}
+.pst-coachClose:hover{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
+.pst-coachClose:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:1px}
+.pst-coachTitle{margin:0;font-size:15px;line-height:22px;font-weight:600}
+.pst-coachBody{margin:0;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:18px}
+.pst-coachList{margin:0;padding-left:16px;color:var(--dsw-alias-label-secondary);font-size:11px;line-height:17px;display:flex;flex-direction:column;gap:3px}
+.pst-coachFoot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:2px;padding-top:10px;border-top:.5px solid var(--dsw-alias-border-l1)}
+.pst-coachSkip{padding:0;border:0;background:none;color:var(--dsw-alias-label-tertiary);font:inherit;font-size:10px;line-height:16px;cursor:pointer}
+.pst-coachSkip:hover{color:var(--dsw-alias-label-primary);text-decoration:underline}
+.pst-coachDots{display:flex;align-items:center;gap:4px}
+.pst-coachDot{width:4px;height:4px;border-radius:50%;background:var(--dsw-alias-border-l2)}
+.pst-coachDotActive{width:13px;border-radius:2px;background:var(--dsw-alias-brand-primary)}
+.pst-coachActions{display:flex;align-items:center;gap:6px}
 .pst-hiddenPanel{box-sizing:border-box;display:flex;flex-direction:column;gap:1px;margin:0 4px 8px 26px;padding:2px 0 2px 8px;border-left:.5px solid var(--dsw-alias-border-l1);background:transparent;flex:none;max-height:240px;overflow:auto}
 .pst-hiddenRow{display:flex;align-items:center;gap:8px;min-width:0;height:26px;padding:0 6px;border-radius:6px}
 .pst-hiddenRow:hover{background:var(--dsw-alias-bg-layer-2)}
@@ -2791,6 +2901,389 @@ window.__ModuleLoader__.load({
           );
         }
 
+        function TourGlyph({ step }) {
+          const base = { width: 64, height: 64, viewBox: '0 0 64 64', fill: 'none', 'aria-hidden': 'true' };
+          if (step === 0) {
+            return h(
+              'svg',
+              base,
+              h('path', { d: 'M9 22h20l5 6h21v22H9z', stroke: 'currentColor', strokeWidth: 2, strokeLinejoin: 'round' }),
+              h('path', { d: 'M9 22v-5h17l5 5', stroke: 'currentColor', strokeWidth: 2, strokeLinejoin: 'round' }),
+              h('circle', { cx: 46, cy: 44, r: 10, fill: 'var(--dsw-alias-bg-layer-1)', stroke: 'currentColor', strokeWidth: 2 }),
+              h('path', { d: 'M46 39v10M41 44h10', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round' }),
+            );
+          }
+          if (step === 1) {
+            return h(
+              'svg',
+              base,
+              h('path', { d: 'M32 8l19 7v13c0 12-8 21-19 27-11-6-19-15-19-27V15z', stroke: 'currentColor', strokeWidth: 2, strokeLinejoin: 'round' }),
+              h('path', { d: 'M23 31l6 6 13-13', stroke: 'currentColor', strokeWidth: 2.2, strokeLinecap: 'round', strokeLinejoin: 'round' }),
+              h('path', { d: 'M17 16h10M17 22h7', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeOpacity: 0.55 }),
+            );
+          }
+          return h(
+            'svg',
+            base,
+            h('path', { d: 'M11 14h31a5 5 0 0 1 5 5v14a5 5 0 0 1-5 5H28l-9 8v-8h-8a5 5 0 0 1-5-5V19a5 5 0 0 1 5-5z', stroke: 'currentColor', strokeWidth: 2, strokeLinejoin: 'round' }),
+            h('path', { d: 'M18 23h20M18 29h13', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' }),
+            h('path', { d: 'M48 12l1.8 5.2L55 19l-5.2 1.8L48 26l-1.8-5.2L41 19l5.2-1.8z', stroke: 'currentColor', strokeWidth: 1.6, strokeLinejoin: 'round' }),
+          );
+        }
+
+        function Onboarding() {
+          const [open, setOpen] = React.useState(() => !readTourSeen());
+          const [step, setStep] = React.useState(0);
+
+          React.useEffect(() => {
+            const onOpen = () => {
+              setStep(0);
+              setOpen(true);
+            };
+            window.addEventListener('plugin-studio:onboarding', onOpen);
+            return () => window.removeEventListener('plugin-studio:onboarding', onOpen);
+          }, []);
+
+          const close = () => {
+            writeTourSeen();
+            setOpen(false);
+            setStep(0);
+          };
+
+          React.useEffect(() => {
+            if (!open) return undefined;
+            const onKeyDown = (event) => {
+              if (event.key === 'Escape') close();
+            };
+            window.addEventListener('keydown', onKeyDown);
+            return () => window.removeEventListener('keydown', onKeyDown);
+          }, [open]);
+
+          if (!open) return null;
+
+          const steps = [
+            {
+              title: tr('tourStep1Title'),
+              body: tr('tourStep1Body'),
+              items: [tr('tourStep1a'), tr('tourStep1b'), tr('tourStep1c')],
+            },
+            {
+              title: tr('tourStep2Title'),
+              body: tr('tourStep2Body'),
+              items: [tr('tourStep2a'), tr('tourStep2b'), tr('tourStep2c')],
+            },
+            {
+              title: tr('tourStep3Title'),
+              body: tr('tourStep3Body'),
+              items: [tr('tourStep3a'), tr('tourStep3b'), tr('tourStep3c')],
+            },
+          ];
+          const current = steps[step];
+          const last = step === steps.length - 1;
+
+          return h(
+            'div',
+            { className: 'pst-tourLayer' },
+            h('div', { className: 'pst-tourBackdrop' }),
+            h(
+              'div',
+              {
+                className: 'pst-tourCard',
+                role: 'dialog',
+                'aria-modal': 'true',
+                'aria-labelledby': 'pst-tour-title',
+              },
+              h(
+                'div',
+                { className: 'pst-tourTop' },
+                h('div', { className: 'pst-tourKicker' }, tr('tourKicker')),
+                h('div', { className: 'pst-tourTopRight' },
+                  h('span', { className: 'pst-tourCount' }, `${step + 1} / ${steps.length}`),
+                  h(
+                    'button',
+                    {
+                      type: 'button',
+                      className: 'pst-tourClose',
+                      onClick: close,
+                      'aria-label': tr('tourClose'),
+                    },
+                    '×',
+                  ),
+                ),
+              ),
+              h('div', { className: 'pst-tourArt' }, h(TourGlyph, { step })),
+              h('h2', { className: 'pst-tourTitle', id: 'pst-tour-title' }, current.title),
+              h('p', { className: 'pst-tourBody' }, current.body),
+              h(
+                'ul',
+                { className: 'pst-tourList' },
+                current.items.map((item, index) => h('li', { key: index }, item)),
+              ),
+              h(
+                'div',
+                { className: 'pst-tourFoot' },
+                h('button', { type: 'button', className: 'pst-tourSkip', onClick: close }, tr('tourSkip')),
+                h(
+                  'div',
+                  { className: 'pst-tourDots' },
+                  steps.map((item, index) =>
+                    h('span', {
+                      key: item.title,
+                      className: `pst-tourDot${index === step ? ' pst-tourDotActive' : ''}`,
+                    })),
+                ),
+                h(
+                  'div',
+                  { className: 'pst-tourActions' },
+                  step === 0
+                    ? null
+                    : h(
+                      'button',
+                      {
+                        type: 'button',
+                        className: 'pst-btn',
+                        onClick: () => setStep((value) => Math.max(0, value - 1)),
+                      },
+                      tr('tourBack'),
+                    ),
+                  h(
+                    'button',
+                    {
+                      type: 'button',
+                      className: 'pst-btn pst-btnPrimary',
+                      onClick: () => {
+                        if (last) close();
+                        else setStep((value) => Math.min(steps.length - 1, value + 1));
+                      },
+                    },
+                    last ? tr('tourStart') : tr('tourNext'),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        function CoachTour() {
+          const [open, setOpen] = React.useState(() => !readTourSeen());
+          const [step, setStep] = React.useState(0);
+          const [tick, setTick] = React.useState(0);
+          const hadChildDialog = React.useRef(false);
+
+          const findVisible = (selector) => {
+            for (const element of document.querySelectorAll(selector)) {
+              const rect = element.getBoundingClientRect();
+              if (rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.top < window.innerHeight) return element;
+            }
+            return null;
+          };
+          const findText = (labels) => {
+            for (const element of document.querySelectorAll('[role="tab"], button')) {
+              const text = (element.textContent || '').trim();
+              if (!labels.some((label) => text === label || text.startsWith(`${label} `))) continue;
+              const rect = element.getBoundingClientRect();
+              if (rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.top < window.innerHeight) return element;
+            }
+            return null;
+          };
+          const targetForStep = (value) => {
+            if (value === 0) {
+              return findVisible('[data-slot="sidebar.workspaces"] [data-row-key^="workspace:"]')
+                || findVisible('[data-row-key^="workspace:"]');
+            }
+            if (value === 1) return findVisible('[data-pst-new-child]');
+            if (value === 2) return findVisible('.pst-childInput') || findVisible('.pst-childModal');
+            if (value === 3) {
+              return findText([tr('tabLabel'), 'Plugin chats', '插件对话'])
+                || findVisible('button[aria-label*="Settings"], button[aria-label*="设置"], [role="button"][aria-label*="Settings"], [role="button"][aria-label*="设置"]');
+            }
+            return null;
+          };
+
+          React.useEffect(() => {
+            const onOpen = () => {
+              setStep(0);
+              setOpen(true);
+            };
+            window.addEventListener('plugin-studio:onboarding', onOpen);
+            return () => window.removeEventListener('plugin-studio:onboarding', onOpen);
+          }, []);
+
+          React.useEffect(() => {
+            if (!open) return undefined;
+            const id = window.setInterval(() => setTick((value) => value + 1), 250);
+            return () => window.clearInterval(id);
+          }, [open]);
+
+          React.useEffect(() => {
+            if (!open) return;
+            if (step === 0 && findVisible('[data-pst-new-child]') !== null) setStep(1);
+            else if (step === 1 && findVisible('.pst-childModal') !== null) {
+              hadChildDialog.current = true;
+              setStep(2);
+            } else if (step === 2) {
+              if (findVisible('.pst-childModal') !== null) {
+                hadChildDialog.current = true;
+              } else if (hadChildDialog.current) {
+                hadChildDialog.current = false;
+                setStep(3);
+              }
+            }
+          }, [open, step, tick]);
+
+          const close = () => {
+            writeTourSeen();
+            setOpen(false);
+            setStep(0);
+          };
+
+          React.useEffect(() => {
+            if (!open) return undefined;
+            const onKeyDown = (event) => {
+              if (event.key === 'Escape') close();
+            };
+            window.addEventListener('keydown', onKeyDown);
+            return () => window.removeEventListener('keydown', onKeyDown);
+          }, [open]);
+
+          if (!open) return null;
+
+          const steps = [
+            {
+              title: tr('tourStep1Title'),
+              body: tr('tourStep1Body'),
+              items: [],
+            },
+            {
+              title: tr('tourStep2Title'),
+              body: tr('tourStep2Body'),
+              items: [tr('tourStep2a'), tr('tourStep2b'), tr('tourStep2c')],
+            },
+            {
+              title: tr('tourInputTitle'),
+              body: tr('tourInputBody'),
+              items: [tr('tourStep1c'), tr('tourStep2b')],
+            },
+            {
+              title: tr('tourStep3Title'),
+              body: tr('tourStep3Body'),
+              items: [tr('tourStep3a'), tr('tourStep3b'), tr('tourStep3c')],
+            },
+          ];
+          const current = steps[step];
+          const target = targetForStep(step);
+          const rect = target === null ? null : target.getBoundingClientRect();
+          const tipWidth = Math.max(260, Math.min(360, window.innerWidth - 24));
+          let left = rect === null
+            ? (window.innerWidth - tipWidth) / 2
+            : rect.left + rect.width / 2 - tipWidth / 2;
+          left = Math.max(12, Math.min(left, window.innerWidth - tipWidth - 12));
+          let top = rect === null ? Math.max(20, window.innerHeight / 2 - 120) : rect.bottom + 12;
+          const estimatedHeight = 260;
+          if (rect !== null && step === 2) {
+            top = Math.max(12, rect.top - estimatedHeight - 12);
+          } else if (rect !== null && top + estimatedHeight > window.innerHeight) {
+            top = Math.max(12, rect.top - estimatedHeight - 12);
+          }
+          const last = step === steps.length - 1;
+
+          return h(
+            'div',
+            { className: 'pst-coachLayer', 'aria-live': 'polite' },
+            rect === null
+              ? null
+              : h('div', {
+                className: 'pst-coachSpot',
+                style: {
+                  left: `${Math.max(0, rect.left - 6)}px`,
+                  top: `${Math.max(0, rect.top - 6)}px`,
+                  width: `${rect.width + 12}px`,
+                  height: `${rect.height + 12}px`,
+                },
+              }),
+            h(
+              'div',
+              {
+                className: `pst-coachTip${rect === null ? ' pst-coachTipCenter' : ''}`,
+                style: { left: `${left}px`, top: `${top}px`, width: `${tipWidth}px` },
+                role: 'dialog',
+                'aria-modal': 'false',
+                'aria-labelledby': 'pst-coach-title',
+              },
+              h(
+                'div',
+                { className: 'pst-coachTop' },
+                h('div', { className: 'pst-coachKicker' }, tr('tourKicker')),
+                h(
+                  'div',
+                  { className: 'pst-coachTopRight' },
+                  h('span', { className: 'pst-coachCount' }, `${step + 1} / ${steps.length}`),
+                  h(
+                    'button',
+                    {
+                      type: 'button',
+                      className: 'pst-coachClose',
+                      onClick: close,
+                      'aria-label': tr('tourClose'),
+                    },
+                    '×',
+                  ),
+                ),
+              ),
+              h('h2', { className: 'pst-coachTitle', id: 'pst-coach-title' }, current.title),
+              h('p', { className: 'pst-coachBody' }, current.body),
+              current.items.length === 0
+                ? null
+                : h(
+                  'ul',
+                  { className: 'pst-coachList' },
+                  current.items.map((item, index) => h('li', { key: index }, item)),
+                ),
+              h(
+                'div',
+                { className: 'pst-coachFoot' },
+                h('button', { type: 'button', className: 'pst-coachSkip', onClick: close }, tr('tourSkip')),
+                h(
+                  'div',
+                  { className: 'pst-coachDots' },
+                  steps.map((item, index) =>
+                    h('span', {
+                      key: item.title,
+                      className: `pst-coachDot${index === step ? ' pst-coachDotActive' : ''}`,
+                    })),
+                ),
+                h(
+                  'div',
+                  { className: 'pst-coachActions' },
+                  step === 0
+                    ? null
+                    : h(
+                      'button',
+                      {
+                        type: 'button',
+                        className: 'pst-btn',
+                        onClick: () => setStep((value) => Math.max(0, value - 1)),
+                      },
+                      tr('tourBack'),
+                    ),
+                  h(
+                    'button',
+                    {
+                      type: 'button',
+                      className: 'pst-btn pst-btnPrimary',
+                      onClick: () => {
+                        if (last) close();
+                        else setStep((value) => Math.min(steps.length - 1, value + 1));
+                      },
+                    },
+                    last ? tr('tourStart') : tr('tourNext'),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
         function QuickSwitcher(props) {
           const [open, setOpen] = React.useState(false);
           const [query, setQuery] = React.useState('');
@@ -3210,6 +3703,15 @@ window.__ModuleLoader__.load({
                 tr('quickSwitch'),
                 h('kbd', { className: 'pst-kbd' }, 'Ctrl+Shift+K'),
               ),
+              h(
+                'button',
+                {
+                  type: 'button',
+                  className: 'pst-btn',
+                  onClick: () => window.dispatchEvent(new Event('plugin-studio:onboarding')),
+                },
+                tr('tutorial'),
+              ),
               h('span', { className: 'pst-wsStat' }, tr('presetHiddenCount').replace('{count}', String(hiddenCount))),
               h('span', { className: 'pst-wsStat' }, tr('presetCollapsedCount').replace('{count}', String(collapsedCount))),
               focus === ''
@@ -3601,6 +4103,17 @@ window.__ModuleLoader__.load({
               order: 45,
             },
             QuickSwitcher,
+          ),
+        );
+
+        ctx.slots.inject('shell.overlay', () =>
+          ctx.slots.register(
+            {
+              name: 'shell.overlay',
+              id: 'plugin-studio.onboarding',
+              order: 46,
+            },
+            CoachTour,
           ),
         );
 
