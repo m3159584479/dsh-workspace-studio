@@ -803,7 +803,8 @@ window.__ModuleLoader__.load({
 .pst-tourActions{display:flex;align-items:center;gap:7px}
 .pst-coachLayer{position:fixed;inset:0;z-index:97;pointer-events:none}
 .pst-coachSpot{position:fixed;z-index:97;box-sizing:border-box;border:1.5px solid var(--dsw-alias-brand-primary);border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,.56);pointer-events:none;transition:left .16s ease,top .16s ease,width .16s ease,height .16s ease}
-.pst-coachTip{position:fixed;z-index:98;box-sizing:border-box;display:flex;flex-direction:column;gap:8px;pointer-events:auto;padding:14px 16px 12px;border:.5px solid var(--dsw-alias-border-l2);border-radius:10px;background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);box-shadow:0 16px 46px rgba(0,0,0,.42)}
+.pst-coachTip{position:fixed;z-index:98;box-sizing:border-box;display:flex;flex-direction:column;gap:8px;pointer-events:none;padding:14px 16px 12px;border:.5px solid var(--dsw-alias-border-l2);border-radius:10px;background:var(--dsw-alias-bg-overlay);color:var(--dsw-alias-label-primary);box-shadow:0 16px 46px rgba(0,0,0,.42)}
+.pst-coachTip button{pointer-events:auto}
 .pst-coachTipCenter{position:fixed}
 .pst-coachTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .pst-coachTopRight{display:flex;align-items:center;gap:7px}
@@ -3101,34 +3102,48 @@ window.__ModuleLoader__.load({
           const hadChildDialog = React.useRef(false);
 
           const findVisible = (selector) => {
-            for (const element of document.querySelectorAll(selector)) {
-              const rect = element.getBoundingClientRect();
-              if (rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.top < window.innerHeight) return element;
+            try {
+              if (typeof document === 'undefined') return null;
+              for (const element of document.querySelectorAll(selector)) {
+                const rect = element.getBoundingClientRect();
+                if (rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.top < window.innerHeight) return element;
+              }
+            } catch (_) {
+              /* a closed or detached tree must not break the tour */
             }
             return null;
           };
           const findText = (labels) => {
-            for (const element of document.querySelectorAll('[role="tab"], [role="button"], [role="menuitem"], button, a')) {
-              const text = (element.textContent || '').trim();
-              if (!labels.some((label) => text === label || text.startsWith(`${label} `))) continue;
-              const rect = element.getBoundingClientRect();
-              if (rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.top < window.innerHeight) return element;
+            try {
+              if (typeof document === 'undefined') return null;
+              for (const element of document.querySelectorAll('[role="tab"], [role="button"], [role="menuitem"], button, a')) {
+                const text = (element.textContent || '').trim();
+                if (!labels.some((label) => text === label || text.startsWith(`${label} `))) continue;
+                const rect = element.getBoundingClientRect();
+                if (rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.top < window.innerHeight) return element;
+              }
+            } catch (_) {
+              /* ignore a selector or layout failure */
             }
             return null;
           };
           const targetForStep = (value) => {
-            if (value === 0) {
-              return findVisible('[data-slot="sidebar.workspaces"] [data-row-key^="workspace:"]')
-                || findVisible('[data-row-key^="workspace:"]');
+            try {
+              if (value === 0) {
+                return findVisible('[data-slot="sidebar.workspaces"] [data-row-key^="workspace:"]')
+                  || findVisible('[data-row-key^="workspace:"]');
+              }
+              if (value === 1) return findVisible('[data-pst-new-child]');
+              if (value === 2) return findVisible('.pst-childInput') || findVisible('.pst-childModal');
+              if (value === 3) {
+                return findVisible('button[aria-label*="Settings"], button[aria-label*="设置"], [role="button"][aria-label*="Settings"], [role="button"][aria-label*="设置"]');
+              }
+              if (value === 4) return findText(['Plugins', '插件']);
+              if (value === 5) return findText([tr('tabLabel'), 'Plugin chats', '插件对话']);
+              if (value === 6) return findText(['Chat', '对话']);
+            } catch (_) {
+              /* fall back to a centered tooltip */
             }
-            if (value === 1) return findVisible('[data-pst-new-child]');
-            if (value === 2) return findVisible('.pst-childInput') || findVisible('.pst-childModal');
-            if (value === 3) {
-              return findVisible('button[aria-label*="Settings"], button[aria-label*="设置"], [role="button"][aria-label*="Settings"], [role="button"][aria-label*="设置"]');
-            }
-            if (value === 4) return findText(['Plugins', '插件']);
-            if (value === 5) return findText([tr('tabLabel'), 'Plugin chats', '插件对话']);
-            if (value === 6) return findText(['Chat', '对话']);
             return null;
           };
 
@@ -3225,7 +3240,14 @@ window.__ModuleLoader__.load({
           ];
           const current = steps[step];
           const target = targetForStep(step);
-          const rect = target === null ? null : target.getBoundingClientRect();
+          let rect = null;
+          if (target !== null) {
+            try {
+              rect = target.getBoundingClientRect();
+            } catch (_) {
+              rect = null;
+            }
+          }
           const tipWidth = Math.max(260, Math.min(360, window.innerWidth - 24));
           let left = rect === null
             ? (window.innerWidth - tipWidth) / 2
