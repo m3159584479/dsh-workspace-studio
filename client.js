@@ -34,7 +34,7 @@ window.__ModuleLoader__.load({
     const PRESETS_KEY = 'dsh.plugin-studio.view-presets.v1';
     const REMOVED_KEY = 'dsh.plugin-studio.removed-workspaces.v1';
     const SNAPSHOT_KEY = 'dsh.plugin-studio.workspace-snapshot.v1';
-    const TOUR_KEY = 'dsh.plugin-studio.onboarding.v2';
+    const TOUR_KEY = 'dsh.plugin-studio.onboarding.v3';
 
     function readTourSeen() {
       try {
@@ -453,6 +453,8 @@ window.__ModuleLoader__.load({
       tutorial: 'Tutorial',
       tourKicker: 'Interactive guide',
       tourTitle: 'Welcome to Workspace Studio',
+      tourPromptTitle: 'First time here?',
+      tourPromptDesc: 'A short interactive guide to real sub-workspaces, safe deletion, and plugin adjustment chat.',
       tourStep1Title: 'Open the workspace menu',
       tourStep1Body: 'Hover this workspace row and click the … button. New sub-workspace, collapse, focus, and hide live there.',
       tourStep1a: 'Open the workspace “…” menu and choose New sub-workspace.',
@@ -465,11 +467,21 @@ window.__ModuleLoader__.load({
       tourStep2c: 'That delete is permanent and only applies to sub-workspaces.',
       tourInputTitle: 'Name the folder and create',
       tourInputBody: 'Type a folder name, then create. The new folder is registered as a child workspace immediately.',
-      tourStep3Title: 'Update plugins by conversation',
-      tourStep3Body: 'Open Settings → Plugins → Plugin chats, choose a non-official plugin or row, then click Chat.',
+      tourSettingsTitle: 'Open Settings',
+      tourSettingsBody: 'Click the Settings entry at the bottom of the sidebar.',
+      tourPluginsTitle: 'Open Plugins',
+      tourPluginsBody: 'In Settings, click the Plugins section.',
+      tourChatsTitle: 'Open Plugin chats',
+      tourChatsBody: 'Click the Plugin chats tab to see the adjustment entry for non-official plugins.',
+      tourStep3Title: 'Start an adjustment chat',
+      tourStep3Body: 'Pick a non-official plugin or one of its rows, then click Chat. The conversation carries the plugin identity, source, and your note.',
       tourStep3a: 'The conversation carries the plugin identity, source, and your note.',
       tourStep3b: 'An existing conversation is reused; Shift+click Chat starts a new one.',
-      tourStep3c: 'The conversation proposes and applies changes only through the normal Agent confirmation flow.',
+      tourStep3c: 'Changes still go through the normal Agent confirmation flow.',
+      tourPathSettings: 'Settings',
+      tourPathPlugins: 'Plugins',
+      tourPathChats: 'Plugin chats',
+      tourPathChat: 'Chat',
       tourBack: 'Back',
       tourNext: 'Next',
       tourStart: 'Done',
@@ -614,6 +626,8 @@ window.__ModuleLoader__.load({
       tutorial: '使用教程',
       tourKicker: '互动引导',
       tourTitle: '欢迎使用工作区工作室',
+      tourPromptTitle: '第一次使用？',
+      tourPromptDesc: '用交互式引导快速了解真实子工作区、删除边界和插件对话。',
       tourStep1Title: '先打开工作区菜单',
       tourStep1Body: '把鼠标移到这个工作区行，点击右侧的 …。新建子工作区、折叠、专注和隐藏都在这里。',
       tourStep1a: '打开工作区行的「…」菜单，选择「新建子工作区」。',
@@ -626,11 +640,21 @@ window.__ModuleLoader__.load({
       tourStep2c: '这个删除是永久的，而且只对子工作区开放。',
       tourInputTitle: '输入文件夹名并创建',
       tourInputBody: '输入文件夹名后点创建。新文件夹会立刻注册成子工作区。',
-      tourStep3Title: '用对话更新插件',
-      tourStep3Body: '打开 Settings → Plugins → 插件对话，选择非官方插件或某一行，然后点「对话」。',
+      tourSettingsTitle: '打开设置',
+      tourSettingsBody: '点击侧边栏底部的「设置」。',
+      tourPluginsTitle: '进入插件页',
+      tourPluginsBody: '在设置里点击「插件」。',
+      tourChatsTitle: '打开插件对话',
+      tourChatsBody: '点击「插件对话」标签，这里是非官方插件的调整入口。',
+      tourStep3Title: '打开一条调整对话',
+      tourStep3Body: '选择一个非官方插件或它的某一行，点击「对话」。会话会带上插件身份、来源和你的说明。',
       tourStep3a: '会话会带上插件身份、来源和你的调整说明。',
       tourStep3b: '已有对话会复用；Shift+点击「对话」新建一条。',
-      tourStep3c: '改动仍通过正常的 Agent 确认流程执行，不会绕过确认。',
+      tourStep3c: '改动仍通过正常的 Agent 确认流程执行。',
+      tourPathSettings: '设置',
+      tourPathPlugins: '插件',
+      tourPathChats: '插件对话',
+      tourPathChat: '对话',
       tourBack: '上一步',
       tourNext: '下一步',
       tourStart: '完成',
@@ -790,6 +814,12 @@ window.__ModuleLoader__.load({
 .pst-coachClose:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:1px}
 .pst-coachTitle{margin:0;font-size:15px;line-height:22px;font-weight:600}
 .pst-coachBody{margin:0;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:18px}
+.pst-coachPath{display:flex;align-items:center;flex-wrap:wrap;gap:2px;padding:7px 8px;border:.5px solid var(--dsw-alias-border-l1);border-radius:7px;background:var(--dsw-alias-bg-layer-2)}
+.pst-coachPathCell{display:flex;align-items:center;gap:2px}
+.pst-coachPathItem{padding:1px 5px;border-radius:4px;color:var(--dsw-alias-label-tertiary);font-size:10px;line-height:16px;white-space:nowrap}
+.pst-coachPathActive{background:var(--dsw-alias-brand-primary);color:var(--dsw-alias-bg-base);font-weight:600}
+.pst-coachPathDone{color:var(--dsw-alias-label-secondary)}
+.pst-coachPathArrow{color:var(--dsw-alias-label-tertiary);font-size:10px;line-height:16px}
 .pst-coachList{margin:0;padding-left:16px;color:var(--dsw-alias-label-secondary);font-size:11px;line-height:17px;display:flex;flex-direction:column;gap:3px}
 .pst-coachFoot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:2px;padding-top:10px;border-top:.5px solid var(--dsw-alias-border-l1)}
 .pst-coachSkip{padding:0;border:0;background:none;color:var(--dsw-alias-label-tertiary);font:inherit;font-size:10px;line-height:16px;cursor:pointer}
@@ -3052,7 +3082,7 @@ window.__ModuleLoader__.load({
                       type: 'button',
                       className: 'pst-btn pst-btnPrimary',
                       onClick: () => {
-                        if (last) close();
+                        if (last) close(true);
                         else setStep((value) => Math.min(steps.length - 1, value + 1));
                       },
                     },
@@ -3078,7 +3108,7 @@ window.__ModuleLoader__.load({
             return null;
           };
           const findText = (labels) => {
-            for (const element of document.querySelectorAll('[role="tab"], button')) {
+            for (const element of document.querySelectorAll('[role="tab"], [role="button"], [role="menuitem"], button, a')) {
               const text = (element.textContent || '').trim();
               if (!labels.some((label) => text === label || text.startsWith(`${label} `))) continue;
               const rect = element.getBoundingClientRect();
@@ -3094,9 +3124,11 @@ window.__ModuleLoader__.load({
             if (value === 1) return findVisible('[data-pst-new-child]');
             if (value === 2) return findVisible('.pst-childInput') || findVisible('.pst-childModal');
             if (value === 3) {
-              return findText([tr('tabLabel'), 'Plugin chats', '插件对话'])
-                || findVisible('button[aria-label*="Settings"], button[aria-label*="设置"], [role="button"][aria-label*="Settings"], [role="button"][aria-label*="设置"]');
+              return findVisible('button[aria-label*="Settings"], button[aria-label*="设置"], [role="button"][aria-label*="Settings"], [role="button"][aria-label*="设置"]');
             }
+            if (value === 4) return findText(['Plugins', '插件']);
+            if (value === 5) return findText([tr('tabLabel'), 'Plugin chats', '插件对话']);
+            if (value === 6) return findText(['Chat', '对话']);
             return null;
           };
 
@@ -3128,11 +3160,17 @@ window.__ModuleLoader__.load({
                 hadChildDialog.current = false;
                 setStep(3);
               }
+            } else if (step === 3 && findText(['Plugins', '插件']) !== null) {
+              setStep(4);
+            } else if (step === 4 && findText([tr('tabLabel'), 'Plugin chats', '插件对话']) !== null) {
+              setStep(5);
+            } else if (step === 5 && findText(['Chat', '对话']) !== null) {
+              setStep(6);
             }
           }, [open, step, tick]);
 
-          const close = () => {
-            writeTourSeen();
+          const close = (persist = true) => {
+            if (persist) writeTourSeen();
             setOpen(false);
             setStep(0);
           };
@@ -3140,7 +3178,7 @@ window.__ModuleLoader__.load({
           React.useEffect(() => {
             if (!open) return undefined;
             const onKeyDown = (event) => {
-              if (event.key === 'Escape') close();
+              if (event.key === 'Escape') close(false);
             };
             window.addEventListener('keydown', onKeyDown);
             return () => window.removeEventListener('keydown', onKeyDown);
@@ -3165,6 +3203,21 @@ window.__ModuleLoader__.load({
               items: [tr('tourStep1c'), tr('tourStep2b')],
             },
             {
+              title: tr('tourSettingsTitle'),
+              body: tr('tourSettingsBody'),
+              items: [],
+            },
+            {
+              title: tr('tourPluginsTitle'),
+              body: tr('tourPluginsBody'),
+              items: [],
+            },
+            {
+              title: tr('tourChatsTitle'),
+              body: tr('tourChatsBody'),
+              items: [],
+            },
+            {
               title: tr('tourStep3Title'),
               body: tr('tourStep3Body'),
               items: [tr('tourStep3a'), tr('tourStep3b'), tr('tourStep3c')],
@@ -3186,6 +3239,7 @@ window.__ModuleLoader__.load({
             top = Math.max(12, rect.top - estimatedHeight - 12);
           }
           const last = step === steps.length - 1;
+          const pathLabels = [tr('tourPathSettings'), tr('tourPathPlugins'), tr('tourPathChats'), tr('tourPathChat')];
 
           return h(
             'div',
@@ -3223,7 +3277,7 @@ window.__ModuleLoader__.load({
                     {
                       type: 'button',
                       className: 'pst-coachClose',
-                      onClick: close,
+                      onClick: () => close(false),
                       'aria-label': tr('tourClose'),
                     },
                     '×',
@@ -3232,6 +3286,27 @@ window.__ModuleLoader__.load({
               ),
               h('h2', { className: 'pst-coachTitle', id: 'pst-coach-title' }, current.title),
               h('p', { className: 'pst-coachBody' }, current.body),
+              step < 3
+                ? null
+                : h(
+                  'div',
+                  { className: 'pst-coachPath' },
+                  pathLabels.map((label, index) =>
+                    h(
+                      'span',
+                      { key: label, className: 'pst-coachPathCell' },
+                      index === 0
+                        ? null
+                        : h('span', { className: 'pst-coachPathArrow' }, '›'),
+                      h(
+                        'span',
+                        {
+                          className: `pst-coachPathItem${index === step - 3 ? ' pst-coachPathActive' : ''}${index < step - 3 ? ' pst-coachPathDone' : ''}`,
+                        },
+                        label,
+                      ),
+                    )),
+                ),
               current.items.length === 0
                 ? null
                 : h(
@@ -3242,7 +3317,7 @@ window.__ModuleLoader__.load({
               h(
                 'div',
                 { className: 'pst-coachFoot' },
-                h('button', { type: 'button', className: 'pst-coachSkip', onClick: close }, tr('tourSkip')),
+                h('button', { type: 'button', className: 'pst-coachSkip', onClick: () => close(true) }, tr('tourSkip')),
                 h(
                   'div',
                   { className: 'pst-coachDots' },
@@ -3272,7 +3347,7 @@ window.__ModuleLoader__.load({
                       type: 'button',
                       className: 'pst-btn pst-btnPrimary',
                       onClick: () => {
-                        if (last) close();
+                        if (last) close(true);
                         else setStep((value) => Math.min(steps.length - 1, value + 1));
                       },
                     },
@@ -3689,6 +3764,29 @@ window.__ModuleLoader__.load({
               { className: 'pst-tabHead' },
               h('h3', { className: 'pst-tabTitle' }, tr('workspaceTabLabel')),
               h('p', { className: 'pst-tabIntro' }, tr('workspaceTabIntro')),
+            ),
+            h(
+              'section',
+              { className: 'pst-card' },
+              h(
+                'div',
+                { className: 'pst-cardTop' },
+                h(
+                  'div',
+                  { className: 'pst-cardText' },
+                  h('div', { className: 'pst-title' }, tr('tourPromptTitle')),
+                  h('p', { className: 'pst-desc' }, tr('tourPromptDesc')),
+                ),
+                h(
+                  'button',
+                  {
+                    type: 'button',
+                    className: 'pst-btn pst-btnPrimary',
+                    onClick: () => window.dispatchEvent(new Event('plugin-studio:onboarding')),
+                  },
+                  tr('tutorial'),
+                ),
+              ),
             ),
             h(
               'div',
